@@ -1773,7 +1773,7 @@ mempoolLoop:
 	blockTxnsRegular = append(blockTxnsRegular, coinbaseTx)
 
 	// Assemble the two transaction trees.
-	for _, tx := range blockTxns {
+	/* for _, tx := range blockTxns {
 		if tx.Tree() == wire.TxTreeRegular {
 			blockTxnsRegular = append(blockTxnsRegular, tx)
 		} else if tx.Tree() == wire.TxTreeStake {
@@ -1782,7 +1782,7 @@ mempoolLoop:
 			minrLog.Tracef("Error adding tx %s to block; invalid tree", tx.Hash())
 			continue
 		}
-	}
+	} */
 
 	for _, tx := range blockTxnsRegular {
 		fee, ok := txFeesMap[*tx.Hash()]

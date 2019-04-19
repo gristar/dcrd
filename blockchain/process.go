@@ -118,11 +118,14 @@ func (b *BlockChain) ProcessBlock(block *dcrutil.Block, flags BehaviorFlags) (in
 		elapsedTime := time.Since(currentTime)
 		log.Debugf("Block %v (height %v) finished processing in %s",
 			blockHash, block.Height(), elapsedTime)
+
+		log.Infof("区块处理用时，区块：%v，高度：%v，用时：%v", blockHash, block.Height(), elapsedTime)
 	}()
 
 	// The block must not already exist in the main chain or side chains.
 	if b.index.HaveBlock(blockHash) {
 		str := fmt.Sprintf("already have block %v", blockHash)
+		log.Infof("区块已经存在，hash: %v，终止处理", blockHash)
 		return 0, false, ruleError(ErrDuplicateBlock, str)
 	}
 
@@ -207,6 +210,7 @@ func (b *BlockChain) ProcessBlock(block *dcrutil.Block, flags BehaviorFlags) (in
 	}
 
 	log.Debugf("Accepted block %v", blockHash)
+	log.Infof("区块已接受 %v", blockHash)
 
 	return forkLen, false, nil
 }

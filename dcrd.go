@@ -36,6 +36,7 @@ var serviceStartOfDayChan = make(chan *config, 1)
 func dcrdMain() error {
 	// Load configuration and parse command line.  This function also
 	// initializes logging and configures it accordingly.
+	dcrdLog.Info("启动 dcrd...")
 	tcfg, _, err := loadConfig()
 	if err != nil {
 		return err
