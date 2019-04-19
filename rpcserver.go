@@ -4007,6 +4007,7 @@ func pruneOldBlockTemplates(s *rpcServer, bestHeight int64) {
 //
 // This function MUST be called with the RPC workstate locked.
 func handleGetWorkRequest(s *rpcServer) (interface{}, error) {
+	rpcsLog.Info("getwork 请求区块信息")
 	state := s.workState
 
 	// Generate a new block template when the current best block has
@@ -4026,6 +4027,8 @@ func handleGetWorkRequest(s *rpcServer) (interface{}, error) {
 		!state.prevHash.IsEqual(&best.Hash) ||
 		(state.lastTxUpdate != lastTxUpdate &&
 			time.Now().After(state.lastGenerated.Add(time.Second))) {
+
+		rpcsLog.Info("构造新区块...")
 		// Reset the extra nonce and clear all expired cached template
 		// variations if the best block changed.
 		if state.prevHash != nil && !state.prevHash.IsEqual(&best.Hash) {
@@ -4055,6 +4058,12 @@ func handleGetWorkRequest(s *rpcServer) (interface{}, error) {
 				"enough voters and failed to find a suitable " +
 				"parent template to build from"
 			return nil, rpcInternalError("internal error", context)
+
+			rpcsLog.Info("构造新区块成功 (timestamp %v, extra nonce %d, target %064x, merkle root %s)",
+			msgBlock.Header.Timestamp, 
+			state.extraNonce,
+			blockchain.CompactToBig(msgBlock.Header.Bits),
+			msgBlock.Header.MerkleRoot)
 		}
 		templateCopy := deepCopyBlockTemplate(template)
 		msgBlock = templateCopy.Block
@@ -4069,6 +4078,12 @@ func handleGetWorkRequest(s *rpcServer) (interface{}, error) {
 		rpcsLog.Debugf("Generated block template (timestamp %v, extra "+
 			"nonce %d, target %064x, merkle root %s)",
 			msgBlock.Header.Timestamp, state.extraNonce,
+			blockchain.CompactToBig(msgBlock.Header.Bits),
+			msgBlock.Header.MerkleRoot)
+
+			rpcsLog.Info("更新新区块成功，(timestamp %v, extra nonce %d, target %064x, merkle root %s)", 
+			msgBlock.Header.Timestamp,
+			state.extraNonce,
 			blockchain.CompactToBig(msgBlock.Header.Bits),
 			msgBlock.Header.MerkleRoot)
 	} else {
@@ -4189,6 +4204,7 @@ func handleGetWorkRequest(s *rpcServer) (interface{}, error) {
 //
 // This function MUST be called with the RPC workstate locked.
 func handleGetWorkSubmission(s *rpcServer, hexData string) (interface{}, error) {
+	rpcsLog.Infof("******已爆块****** 开始处理新区块...，hexData:%+v", hexData)
 	// Ensure the provided data is sane.
 	if len(hexData)%2 != 0 {
 		hexData = "0" + hexData
@@ -4293,6 +4309,7 @@ func handleGetWorkSubmission(s *rpcServer, hexData string) (interface{}, error) 
 
 // handleGetWork implements the getwork command.
 func handleGetWork(s *rpcServer, cmd interface{}, closeChan <-chan struct{}) (interface{}, error) {
+	rpcsLog.Info("开始处理 getwork 请求...")
 	if s.server.cpuMiner.IsMining() {
 		return nil, rpcMiscError("getwork polling is disallowed " +
 			"while CPU mining is enabled. Please disable CPU " +
